@@ -3,68 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Форум с Appwrite</title>
+  <title>Web-платформа с Appwrite</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <header><h1>Форум с Appwrite</h1></header>
+  <header>
+    <div class="top-bar">
+      <h1>Web-платформа с Appwrite</h1>
+      <nav class="main-nav">
+        <button data-page="home" class="active">Главная</button>
+        <button data-page="auth">Регистрация / Вход</button>
+        <button data-page="news">Новости</button>
+        <button data-page="private">Личный чат</button>
+        <button data-page="profile">Личный кабинет</button>
+        <button data-page="about">О нас</button>
+      </nav>
+    </div>
+  </header>
 
   <main>
-    <section id="posts-section">
-      <h2>Все сообщения</h2>
-      <div id="posts-container"></div>
+    <section id="home-section" class="page active">
+      <h2>Главная</h2>
+      <p class="lead">Добро пожаловать! Здесь вы можете публиковать сообщения, следить за новостями и общаться в личных чатах.</p>
+      <div class="grid-two-col">
+        <div>
+          <h3>Форум</h3>
+          <div id="home-forum"></div>
+        </div>
+        <div>
+          <h3>Новости</h3>
+          <div id="home-news"></div>
+        </div>
+      </div>
     </section>
 
-    <section id="new-post-section">
-      <h2>Создать сообщение</h2>
-      <input type="text" id="title" placeholder="Заголовок">
-      <textarea id="content" placeholder="Содержание"></textarea>
-      <input type="text" id="author" placeholder="Ваше имя">
-      <input type="text" id="category" placeholder="Категория">
-      <input type="text" id="tags" placeholder="Теги через запятую">
-      <button id="create-btn">Создать</button>
+    <section id="auth-section" class="page">
+      <h2>Регистрация и вход</h2>
+      <div id="auth-status" class="auth-status"></div>
+      <div class="grid-two-col">
+        <article class="card">
+          <h3>Регистрация</h3>
+          <form id="register-form">
+            <input type="text" id="register-name" placeholder="Ваше имя" required>
+            <input type="email" id="register-email" placeholder="Email" required>
+            <input type="password" id="register-password" placeholder="Пароль" required>
+            <button type="submit">Зарегистрироваться</button>
+          </form>
+        </article>
+        <article class="card">
+          <h3>Вход</h3>
+          <form id="login-form">
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+          </form>
+        </article>
+      </div>
+    </section>
+
+    <section id="news-section" class="page">
+      <h2>Публичный чат и новости</h2>
+      <div class="card">
+        <h3>Публикация новости</h3>
+        <form id="news-form">
+          <input type="text" id="news-title" placeholder="Заголовок новости" required>
+          <textarea id="news-body" placeholder="Текст новости" rows="4" required></textarea>
+          <button type="submit">Опубликовать</button>
+        </form>
+      </div>
+      <div id="news-feed"></div>
+    </section>
+
+    <section id="private-section" class="page">
+      <h2>Личный чат</h2>
+      <div class="card private-card" id="private-chat-area">
+        <div class="inline-row">
+          <label for="private-contact">Выберите собеседника:</label>
+          <select id="private-contact"></select>
+        </div>
+        <h3 id="chat-user-name"></h3>
+        <div id="private-messages" class="messages-window"></div>
+        <form id="private-form" class="chat-form">
+          <input id="private-message-text" type="text" placeholder="Напишите сообщение" autocomplete="off" required>
+          <button type="submit">Отправить</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="profile-section" class="page">
+      <h2>Личный кабинет</h2>
+      <div class="card profile-card">
+        <p><strong>Имя:</strong> <span id="profile-name"></span></p>
+        <p><strong>Email:</strong> <span id="profile-email"></span></p>
+        <button id="logout-btn">Выйти</button>
+      </div>
+    </section>
+
+    <section id="about-section" class="page">
+      <h2>О платформе</h2>
+      <div class="card">
+        <p>Это демонстрационный сайт, который показывает как можно добавить регистрацию, личные чаты, общую новостную ленту и личный кабинет.</p>
+        <ul>
+          <li>Регистрация и вход через Appwrite</li>
+          <li>Публичные новости и объявления</li>
+          <li>Личные чаты с участниками</li>
+          <li>Профиль пользователя и управление сессией</li>
+        </ul>
+      </div>
     </section>
   </main>
 
-  <script type="module">
-    import { getPosts, createPost, incrementViews } from './scripts/appwrite.js';
+  <footer>
+    <p>Платформа Appwrite · Стандартная страница с чатами и профилем</p>
+  </footer>
 
-    const postsContainer = document.getElementById("posts-container");
-    const createBtn = document.getElementById("create-btn");
-
-    async function renderPosts() {
-      const posts = await getPosts();
-      postsContainer.innerHTML = "";
-      posts.forEach(post => {
-        const div = document.createElement("div");
-        div.className = "post-card";
-        div.innerHTML = `
-          <h3>${post.заголовок}</h3>
-          <p>${post.содержание}</p>
-          <p><b>Автор:</b> ${post.авторИмя} | <b>Категория:</b> ${post.категория}</p>
-          <p><b>Просмотры:</b> ${post.просмотры} | <b>Теги:</b> ${post.теги.join(", ")}</p>
-          <button class="view-btn">Просмотр +1</button>
-        `;
-        const viewBtn = div.querySelector(".view-btn");
-        viewBtn.addEventListener("click", async () => {
-          await incrementViews(post.$id, post.просмотры);
-          renderPosts();
-        });
-        postsContainer.appendChild(div);
-      });
-    }
-
-    createBtn.addEventListener("click", async () => {
-      const title = document.getElementById("title").value;
-      const content = document.getElementById("content").value;
-      const author = document.getElementById("author").value;
-      const category = document.getElementById("category").value;
-      const tags = document.getElementById("tags").value.split(",").map(t => t.trim());
-      await createPost(title, content, author, category, tags);
-      renderPosts();
-    });
-
-    renderPosts();
-  </script>
+  <script type="module" src="./scripts/app.js"></script>
 </body>
 </html>

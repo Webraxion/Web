@@ -1,25 +1,43 @@
-<script type="module">
-  import { Client, Databases } from "https://cdn.jsdelivr.net/npm/appwrite@8.1.0/dist/appwrite.min.js";
+import { Client, Account, Databases, ID, Query } from "https://cdn.jsdelivr.net/npm/appwrite@8.1.0/dist/appwrite.min.js";
 
-  // Настройка клиента
-  const client = new Client();
-  client
-    .setEndpoint("https://[YOUR_APPWRITE_DOMAIN]/v1") // адрес Appwrite
-    .setProject("[YOUR_PROJECT_ID]"); // ID проекта
+const client = new Client();
+client
+  .setEndpoint("https://fra.cloud.appwrite.io/v1")
+  .setProject("69d64e50001a12cb1240");
 
-  const databases = new Databases(client);
+const account = new Account(client);
+const databases = new Databases(client);
 
-  const DATABASE_ID = "69d64eb3002e5d21f507"; // твой ID базы данных
+const DATABASE_ID = "69d64eb3002e5d21f507";
+const COLLECTION_FORUM = "forum";
+const COLLECTION_NEWS = "news";
+const COLLECTION_PRIVATE = "private_chat";
 
-  // Функция получения всех сообщений
-  export async function getPosts() {
-    const response = await databases.listDocuments(DATABASE_ID);
-    return response.documents;
-  }
+export async function register(email, password, name) {
+  return account.create(ID.unique(), email, password, name);
+}
 
-  // Функция добавления нового сообщения
-  export async function createPost(title, content, author, category, tags=[]) {
-    const response = await databases.createDocument(DATABASE_ID, {
+export async function login(email, password) {
+  return account.createEmailSession(email, password);
+}
+
+export async function logout() {
+  return account.deleteSession('current');
+}
+
+export async function getCurrentAccount() {
+  return account.get();
+}
+
+export async function getPosts() {
+  return databases.listDocuments(DATABASE_ID, COLLECTION_FORUM);
+}
+
+export async function createPost(title, content, author, category, tags = []) {
+  return databases.createDocument(
+    DATABASE_ID,
+    COLLECTION_FORUM,
+    {
       заголовок: title,
       содержание: content,
       авторИмя: author,
@@ -27,14 +45,50 @@
       категория: category,
       просмотры: 0,
       теги: tags
-    }, ["*"], ["*"]); // разрешения: все могут читать и писать
-    return response;
-  }
+    },
+    ["*"],
+    ["*"]
+  );
+}
 
-  // Функция увеличения просмотров
-  export async function incrementViews(documentId, currentViews) {
-    await databases.updateDocument(DATABASE_ID, documentId, {
-      просмотры: currentViews + 1
-    });
-  }
-</script>
+export async function getNewsPosts() {
+  return databases.listDocuments(DATABASE_ID, COLLECTION_NEWS);
+}
+
+export async function createNewsPost(title, body, author) {
+  return databases.createDocument(
+    DATABASE_ID,
+    COLLECTION_NEWS,
+    {
+      заголовок: title,
+      содержание: body,
+      автор: author,
+      дата: new Date().toISOString()
+    },
+    ["*"],
+    ["*"]
+  );
+}
+
+export async function getPrivateMessages(chatId) {
+  return databases.listDocuments(
+    DATABASE_ID,
+    COLLECTION_PRIVATE,
+    [Query.equal('chatId', chatId)]
+  );
+}
+
+export async function sendPrivateMessage(chatId, text, author) {
+  return databases.createDocument(
+    DATABASE_ID,
+    COLLECTION_PRIVATE,
+    {
+      chatId,
+      text,
+      author,
+      время: new Date().toISOString()
+    },
+    ["*"],
+    ["*"]
+  );
+}
