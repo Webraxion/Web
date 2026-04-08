@@ -15,7 +15,7 @@
         <button data-page="auth">Регистрация / Вход</button>
         <button data-page="news">Новости</button>
         <button data-page="private">Личный чат</button>
-        <button data-page="profile">Личный кабинет</button>
+        <button data-page="profile">Профиль</button>
         <button data-page="about">О нас</button>
       </nav>
     </div>
@@ -24,17 +24,37 @@
   <main>
     <section id="home-section" class="page active">
       <h2>Главная</h2>
-      <p class="lead">Добро пожаловать! Здесь вы можете публиковать сообщения, следить за новостями и общаться в личных чатах.</p>
+      <p class="lead">Здесь доступен личный кабинет, регистрация, вход, выход и публикация контента.</p>
       <div class="grid-two-col">
         <div>
-          <h3>Форум</h3>
-          <div id="home-forum"></div>
+          <div class="card">
+            <h3>Создать тему</h3>
+            <form id="forum-form">
+              <input type="text" id="forum-title" placeholder="Заголовок темы" required>
+              <textarea id="forum-content" placeholder="Текст темы" rows="4" required></textarea>
+              <input type="text" id="forum-category" placeholder="Категория" required>
+              <input type="text" id="forum-tags" placeholder="Теги через запятую">
+              <button type="submit">Опубликовать тему</button>
+            </form>
+            <p class="small-note">Только зарегистрированные пользователи могут публиковать темы.</p>
+          </div>
         </div>
         <div>
-          <h3>Новости</h3>
-          <div id="home-news"></div>
+          <div class="card">
+            <h3>Что вы можете сделать</h3>
+            <ul>
+              <li>Зарегистрироваться и войти на сайт</li>
+              <li>Управлять личным кабинетом</li>
+              <li>Писать новости и темы</li>
+              <li>Общаться в личном чате</li>
+            </ul>
+          </div>
         </div>
       </div>
+      <h3>Список тем</h3>
+      <div id="home-forum"></div>
+      <h3>Свежие новости</h3>
+      <div id="home-news"></div>
     </section>
 
     <section id="auth-section" class="page">
@@ -62,14 +82,15 @@
     </section>
 
     <section id="news-section" class="page">
-      <h2>Публичный чат и новости</h2>
+      <h2>Новости</h2>
       <div class="card">
-        <h3>Публикация новости</h3>
+        <h3>Опубликовать новость</h3>
         <form id="news-form">
           <input type="text" id="news-title" placeholder="Заголовок новости" required>
           <textarea id="news-body" placeholder="Текст новости" rows="4" required></textarea>
           <button type="submit">Опубликовать</button>
         </form>
+        <p class="small-note">Только после входа в систему.</p>
       </div>
       <div id="news-feed"></div>
     </section>
@@ -78,13 +99,13 @@
       <h2>Личный чат</h2>
       <div class="card private-card" id="private-chat-area">
         <div class="inline-row">
-          <label for="private-contact">Выберите собеседника:</label>
+          <label for="private-contact">Выберите собеседника</label>
           <select id="private-contact"></select>
         </div>
         <h3 id="chat-user-name"></h3>
         <div id="private-messages" class="messages-window"></div>
         <form id="private-form" class="chat-form">
-          <input id="private-message-text" type="text" placeholder="Напишите сообщение" autocomplete="off" required>
+          <input id="private-message-text" type="text" placeholder="Ваше сообщение" autocomplete="off" required>
           <button type="submit">Отправить</button>
         </form>
       </div>
@@ -93,8 +114,9 @@
     <section id="profile-section" class="page">
       <h2>Личный кабинет</h2>
       <div class="card profile-card">
-        <p><strong>Имя:</strong> <span id="profile-name"></span></p>
-        <p><strong>Email:</strong> <span id="profile-email"></span></p>
+        <p><strong>Имя</strong>: <span id="profile-name"></span></p>
+        <p><strong>Email</strong>: <span id="profile-email"></span></p>
+        <p><strong>Статус</strong>: <span id="profile-status"></span></p>
         <button id="logout-btn">Выйти</button>
       </div>
     </section>
@@ -102,19 +124,19 @@
     <section id="about-section" class="page">
       <h2>О платформе</h2>
       <div class="card">
-        <p>Это демонстрационный сайт, который показывает как можно добавить регистрацию, личные чаты, общую новостную ленту и личный кабинет.</p>
+        <p>Это современная платформа для регистрации, личного кабинета, публикации новостей и общения.</p>
         <ul>
-          <li>Регистрация и вход через Appwrite</li>
-          <li>Публичные новости и объявления</li>
-          <li>Личные чаты с участниками</li>
-          <li>Профиль пользователя и управление сессией</li>
+          <li>Регистрация / Вход через Appwrite</li>
+          <li>Публикация тем и новостей</li>
+          <li>Личный чат с участниками</li>
+          <li>Хранение сессии и профиль пользователя</li>
         </ul>
       </div>
     </section>
   </main>
 
   <footer>
-    <p>Платформа Appwrite · Стандартная страница с чатами и профилем</p>
+    <p>Web-платформа · Appwrite интеграция</p>
   </footer>
 
   <script type="module" src="./scripts/app.js"></script>
