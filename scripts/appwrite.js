@@ -1,94 +1,88 @@
-import { Client, Account, Databases, ID, Query } from "https://cdn.jsdelivr.net/npm/appwrite@8.1.0/dist/appwrite.min.js";
+const API_BASE = '/api';
 
-const client = new Client();
-client
-  .setEndpoint("https://fra.cloud.appwrite.io/v1")
-  .setProject("69d64e50001a12cb1240");
+async function request(path, options = {}) {
+  const token = localStorage.getItem('apiToken');
+  const headers = options.headers || {};
 
-const account = new Account(client);
-const databases = new Databases(client);
+  if (options.body) {
+    headers['Content-Type'] = 'application/json';
+  }
 
-const DATABASE_ID = "69d64eb3002e5d21f507";
-const COLLECTION_FORUM = "forum";
-const COLLECTION_NEWS = "news";
-const COLLECTION_PRIVATE = "private_chat";
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+    body: options.body || undefined
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    const errorMessage = errorData?.message || response.statusText;
+    throw new Error(errorMessage);
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
+}
 
 export async function register(email, password, name) {
-  return account.create(ID.unique(), email, password, name);
+  return request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ email, password, name })
+  });
 }
 
 export async function login(email, password) {
-  return account.createEmailSession(email, password);
+  return request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password })
+  });
 }
 
 export async function logout() {
-  return account.deleteSession('current');
+  localStorage.removeItem('apiToken');
+  return Promise.resolve();
 }
 
 export async function getCurrentAccount() {
-  return account.get();
+  return request('/auth/me');
 }
 
 export async function getPosts() {
-  return databases.listDocuments(DATABASE_ID, COLLECTION_FORUM);
+  return request('/forum');
 }
 
 export async function createPost(title, content, author, category, tags = []) {
-  return databases.createDocument(
-    DATABASE_ID,
-    COLLECTION_FORUM,
-    {
-      заголовок: title,
-      содержание: content,
-      авторИмя: author,
-      дата_публикации: new Date().toISOString(),
-      категория: category,
-      просмотры: 0,
-      теги: tags
-    },
-    ["*"],
-    ["*"]
-  );
+  return request('/forum', {
+    method: 'POST',
+    body: JSON.stringify({ title, content, category, tags })
+  });
 }
 
 export async function getNewsPosts() {
-  return databases.listDocuments(DATABASE_ID, COLLECTION_NEWS);
+  return request('/news');
 }
 
-export async function createNewsPost(title, body, author) {
-  return databases.createDocument(
-    DATABASE_ID,
-    COLLECTION_NEWS,
-    {
-      заголовок: title,
-      содержание: body,
-      автор: author,
-      дата: new Date().toISOString()
-    },
-    ["*"],
-    ["*"]
-  );
+export async function createNewsPost(title, body) {
+  return request('/news', {
+    method: 'POST',
+    body: JSON.stringify({ title, body })
+  });
 }
 
-export async function getPrivateMessages(chatId) {
-  return databases.listDocuments(
-    DATABASE_ID,
-    COLLECTION_PRIVATE,
-    [Query.equal('chatId', chatId)]
-  );
+export async function getPrivateMessages(contact) {
+  return request(`/private/${encodeURIComponent(contact)}`);
 }
 
-export async function sendPrivateMessage(chatId, text, author) {
-  return databases.createDocument(
-    DATABASE_ID,
-    COLLECTION_PRIVATE,
-    {
-      chatId,
-      text,
-      author,
-      время: new Date().toISOString()
-    },
-    ["*"],
-    ["*"]
-  );
+export async function sendPrivateMessage(contact, text) {
+  return request(`/private/${encodeURIComponent(contact)}`, {
+    method: 'POST',
+    body: JSON.stringify({ text })
+  });
 }

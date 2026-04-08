@@ -1,4 +1,4 @@
-import { register as appwriteRegister, login as appwriteLogin, logout as appwriteLogout, getCurrentAccount, createPost, createNewsPost } from './appwrite.js';
+import { register as appwriteRegister, login as appwriteLogin, logout as appwriteLogout, getCurrentAccount, getPosts, createPost, getNewsPosts, createNewsPost, getPrivateMessages, sendPrivateMessage } from './appwrite.js';
 
 const STORAGE_STATE = 'webPlatformState';
 const STORAGE_USER = 'webPlatformUser';
@@ -101,27 +101,37 @@ function saveUser(user) {
   }
 }
 
+function saveToken(token) {
+  if (token) {
+    localStorage.setItem('apiToken', token);
+  } else {
+    localStorage.removeItem('apiToken');
+  }
+}
+
 async function handleRegister(event) {
   event.preventDefault();
   const name = document.getElementById('register-name').value.trim();
   const email = document.getElementById('register-email').value.trim();
   const password = document.getElementById('register-password').value.trim();
+
   if (!name || !email || !password) {
     alert('Заполните все поля регистрации.');
     return;
   }
 
   try {
-    await appwriteRegister(email, password, name);
-    const user = { name, email };
+    const result = await appwriteRegister(email, password, name);
+    saveToken(result.token);
+    const user = result.user;
     state.user = user;
     saveUser(user);
     renderAll();
     alert('Регистрация прошла успешно. Вы вошли в систему.');
     event.target.reset();
   } catch (error) {
-    console.warn('Appwrite регистрация не удалась:', error);
-    alert('Ошибка регистрации через Appwrite. Проверьте настройки или повторите позже.');
+    console.warn('Ошибка регистрации:', error);
+    alert(`Регистрация не удалась: ${error.message}`);
   }
 }
 
@@ -129,22 +139,24 @@ async function handleLogin(event) {
   event.preventDefault();
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value.trim();
+
   if (!email || !password) {
     alert('Заполните email и пароль.');
     return;
   }
 
   try {
-    await appwriteLogin(email, password);
-    const user = { name: email.split('@')[0], email };
+    const result = await appwriteLogin(email, password);
+    saveToken(result.token);
+    const user = result.user;
     state.user = user;
     saveUser(user);
     renderAll();
     alert('Вход выполнен.');
     event.target.reset();
   } catch (error) {
-    console.warn('Appwrite вход не удался:', error);
-    alert('Ошибка входа через Appwrite. Проверьте данные или повторите позже.');
+    console.warn('Ошибка входа:', error);
+    alert(`Вход не удался: ${error.message}`);
   }
 }
 
@@ -152,8 +164,9 @@ async function handleLogout() {
   try {
     await appwriteLogout();
   } catch (error) {
-    console.warn('Appwrite logout не удался:', error);
+    console.warn('Ошибка выхода:', error);
   }
+  saveToken(null);
   state.user = null;
   saveUser(null);
   renderAll();
@@ -177,12 +190,15 @@ async function handleForumSubmit(event) {
   }
 
   try {
-    await createPost(title, content, state.user.name, category, tags);
+    const post = await createPost(title, content, state.user.name, category, tags);
+    if (post) {
+      state.forumPosts.unshift(post);
+    }
   } catch (error) {
-    console.warn('Appwrite публикация темы не удалась, сохраняю локально:', error);
+    console.warn('Сервер недоступен, сохраняю тему локально:', error);
+    state.forumPosts.unshift({ title, content, author: state.user.name, category, tags, views: 0 });
   }
 
-  state.forumPosts.unshift({ title, content, author: state.user.name, category, tags, views: 0 });
   saveState();
   renderHome();
   elements.forumForm.reset();
@@ -204,16 +220,31 @@ async function handleNewsSubmit(event) {
   }
 
   try {
-    await createNewsPost(title, body, state.user.name);
+    const news = await createNewsPost(title, body);
+    if (news) {
+      state.newsPosts.unshift(news);
+    }
   } catch (error) {
-    console.warn('Appwrite публикация новости не удалась, сохраняю локально:', error);
+    console.warn('Сервер недоступен, сохраняю новость локально:', error);
+    state.newsPosts.unshift({ title, body, author: state.user.name, date: new Date().toLocaleDateString('ru-RU') });
   }
 
-  state.newsPosts.unshift({ title, body, author: state.user.name, date: new Date().toLocaleDateString('ru-RU') });
   saveState();
   renderNews();
   elements.newsForm.reset();
   alert('Новость опубликована.');
+}
+
+async function loadPrivateChat(contact) {
+  if (!state.user) {
+    return;
+  }
+  try {
+    const messages = await getPrivateMessages(contact);
+    state.privateChats[contact] = messages;
+  } catch (error) {
+    console.warn('Не удалось загрузить личный чат:', error);
+  }
 }
 
 function renderSection(pageId) {
@@ -226,8 +257,8 @@ function renderHome() {
     <article class="card">
       <h4>${post.title}</h4>
       <p>${post.content}</p>
-      <p class="meta">Автор: ${post.author} · Категория: ${post.category} · Просмотров: ${post.views}</p>
-      <p class="tags">${post.tags.map(tag => `<span>${tag}</span>`).join('')}</p>
+      <p class="meta">Автор: ${post.author} · Категория: ${post.category || 'Общие'} · Просмотров: ${post.views || 0}</p>
+      <p class="tags">${(post.tags || []).map(tag => `<span>${tag}</span>`).join('')}</p>
     </article>
   `).join('');
 
@@ -286,6 +317,7 @@ function renderPrivateChats() {
   currentContact = elements.privateContactSelect.value || currentContact;
   elements.chatUserName.textContent = currentContact;
   const messages = state.privateChats[currentContact] || [];
+
   if (!state.user) {
     elements.privateMessages.innerHTML = '<div class="chat-notice">Войдите на сайт, чтобы начать личный чат.</div>';
   } else {
@@ -310,8 +342,9 @@ function renderAll() {
   renderPrivateChats();
 }
 
-function handleContactChange() {
+async function handleContactChange() {
   currentContact = elements.privateContactSelect.value;
+  await loadPrivateChat(currentContact);
   renderPrivateChats();
 }
 
@@ -331,7 +364,7 @@ function setupForms() {
   elements.logoutButton.addEventListener('click', handleLogout);
 }
 
-function handlePrivateSubmit(event) {
+async function handlePrivateSubmit(event) {
   event.preventDefault();
   if (!state.user) {
     alert('Войдите, чтобы отправлять личные сообщения.');
@@ -347,8 +380,17 @@ function handlePrivateSubmit(event) {
     text,
     time: now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   };
-  state.privateChats[currentContact] = state.privateChats[currentContact] || [];
-  state.privateChats[currentContact].push(message);
+
+  try {
+    const serverMessage = await sendPrivateMessage(currentContact, text);
+    state.privateChats[currentContact] = state.privateChats[currentContact] || [];
+    state.privateChats[currentContact].push(serverMessage || message);
+  } catch (error) {
+    console.warn('Сервер недоступен, сохраняю сообщение локально:', error);
+    state.privateChats[currentContact] = state.privateChats[currentContact] || [];
+    state.privateChats[currentContact].push(message);
+  }
+
   saveState();
   elements.privateMessageText.value = '';
   renderPrivateChats();
@@ -362,12 +404,26 @@ async function init() {
 
   try {
     const account = await getCurrentAccount();
-    if (account && account.$id) {
+    if (account && account.email) {
       state.user = { name: account.name || account.email.split('@')[0], email: account.email };
       saveUser(state.user);
     }
   } catch (err) {
     console.warn('Нет активной сессии Appwrite:', err);
+    saveToken(null);
+  }
+
+  try {
+    const [forum, news] = await Promise.all([getPosts(), getNewsPosts()]);
+    if (Array.isArray(forum) && forum.length) {
+      state.forumPosts = forum;
+    }
+    if (Array.isArray(news) && news.length) {
+      state.newsPosts = news;
+    }
+    await loadPrivateChat(currentContact);
+  } catch (error) {
+    console.warn('Не удалось загрузить данные с сервера:', error);
   }
 
   setupNavigation();
