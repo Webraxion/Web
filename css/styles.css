@@ -1,4 +1,3 @@
-/* Общие стили */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
@@ -59,35 +58,50 @@ main {
   padding-bottom: 0.5rem;
 }
 
-.topic-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.topic-card {
+/* Чат */
+.chat-container {
   background: white;
-  padding: 1rem;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
-.topic-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+#messages {
+  height: 300px;
+  overflow-y: auto;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
 }
 
-.topic-card a {
-  text-decoration: none;
-  color: #1565c0;
-  font-weight: 600;
-  display: block;
-  font-size: 1rem;
+.message {
+  padding: 0.5rem;
+  margin: 0.2rem 0;
+  background: #e3f2fd;
+  border-radius: 5px;
 }
 
-.topic-card a:hover {
-  text-decoration: underline;
+#chat-input {
+  width: 70%;
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#send-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  border: none;
+  background: #1976d2;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#send-btn:hover {
+  background: #1565c0;
 }
 
 footer {
