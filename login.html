@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход · Web-платформа</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Web-платформа</a>
+      <nav class="site-nav">
+        <a href="index.html">Главная</a>
+        <a href="forum.html">Форум</a>
+        <a href="news.html">Новости</a>
+        <a href="chat.html">Чат</a>
+        <a href="profile.html">Профиль</a>
+        <a href="about.html">О нас</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page page-auth">
+    <section class="auth-shell">
+      <div class="auth-card">
+        <h1>Вход</h1>
+        <p>Войдите в свой аккаунт для доступа к форуму, новостям и чату.</p>
+        <form id="login-form" class="form-grid">
+          <label for="login-email">Email</label>
+          <input id="login-email" type="email" placeholder="Email" required>
+          <label for="login-password">Пароль</label>
+          <input id="login-password" type="password" placeholder="Пароль" required>
+          <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+        <p class="form-note">Нет аккаунта? <a href="register.html">Зарегистрироваться</a></p>
+        <div id="auth-status" class="status-banner"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Web-платформа · Node.js проект</p>
+  </footer>
+
+  <script type="module" src="scripts/auth.js"></script>
+</body>
+</html>

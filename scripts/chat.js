@@ -1,66 +1,83 @@
-// Конфигурация
-const REPO = "username/repo"; // <--- замените на ваш user/repo
-const ISSUE_TITLE = "Chat Room";
-const TOKEN = "ghp_yourPersonalAccessToken"; // <--- ваш токен GitHub
-const API_BASE = "https://api.github.com";
+import { getPrivateMessages, sendPrivateMessage, getCurrentAccount } from './appwrite.js';
 
-const messagesDiv = document.getElementById("messages");
-const input = document.getElementById("chat-input");
-const btn = document.getElementById("send-btn");
+const chatStatus = document.getElementById('chat-status');
+const contactSelect = document.getElementById('private-contact');
+const messagesWindow = document.getElementById('private-messages');
+const chatForm = document.getElementById('private-form');
+const messageInput = document.getElementById('private-message-text');
 
-// Получение issue ID по названию
-async function getIssueId() {
-  const res = await fetch(`${API_BASE}/repos/${REPO}/issues`, {
-    headers: { Authorization: `token ${TOKEN}` }
-  });
-  const issues = await res.json();
-  const issue = issues.find(i => i.title === ISSUE_TITLE);
-  return issue.number;
+const contacts = ['Алексей', 'Мария', 'Никита'];
+let currentContact = contacts[0];
+
+function setStatus(message) {
+  if (chatStatus) chatStatus.textContent = message;
 }
 
-// Получение комментариев
-async function loadMessages() {
-  const issueId = await getIssueId();
-  const res = await fetch(`${API_BASE}/repos/${REPO}/issues/${issueId}/comments`, {
-    headers: { Authorization: `token ${TOKEN}` }
-  });
-  const comments = await res.json();
-  messagesDiv.innerHTML = "";
-  comments.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "message";
-    div.textContent = `${c.user.login}: ${c.body}`;
-    messagesDiv.appendChild(div);
-  });
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+function renderMessages(messages) {
+  if (!messagesWindow) return;
+  if (!messages?.length) {
+    messagesWindow.innerHTML = '<div class="chat-notice">Нет сообщений в этом чате.</div>';
+    return;
+  }
+  messagesWindow.innerHTML = messages.map(msg => `
+    <div class="chat-message ${msg.from === 'Вы' ? 'my-message' : 'other-message'}">
+      <div class="chat-from">${msg.from}</div>
+      <div class="chat-text">${msg.text}</div>
+      <div class="chat-time">${msg.time}</div>
+    </div>
+  `).join('');
 }
 
-// Отправка нового сообщения
-async function sendMessage(text) {
-  const issueId = await getIssueId();
-  await fetch(`${API_BASE}/repos/${REPO}/issues/${issueId}/comments`, {
-    method: "POST",
-    headers: {
-      "Authorization": `token ${TOKEN}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ body: text })
-  });
-  await loadMessages();
+async function loadChat(contact) {
+  try {
+    const messages = await getPrivateMessages(contact);
+    renderMessages(messages);
+  } catch (error) {
+    setStatus(`Не удалось загрузить чат: ${error.message}`);
+  }
 }
 
-// Обработчики
-btn.addEventListener("click", async () => {
-  const text = input.value.trim();
-  if(!text) return;
-  input.value = "";
-  await sendMessage(text);
-});
+function fillContacts() {
+  if (!contactSelect) return;
+  contactSelect.innerHTML = contacts.map(contact => `
+    <option value="${contact}">${contact}</option>
+  `).join('');
+}
 
-input.addEventListener("keypress", async e => {
-  if(e.key === "Enter") btn.click();
-});
+async function initChat() {
+  fillContacts();
+  if (!contactSelect) return;
+  currentContact = contactSelect.value || currentContact;
+  try {
+    const account = await getCurrentAccount();
+    setStatus(`Вы вошли как ${account.name || account.email}`);
+    await loadChat(currentContact);
+  } catch {
+    setStatus('Войдите в систему, чтобы использовать чат.');
+    renderMessages([]);
+  }
+}
 
-// Инициализация
-loadMessages();
-console.log("Чат через GitHub загружен!");
+if (contactSelect) {
+  contactSelect.addEventListener('change', async event => {
+    currentContact = event.target.value;
+    await loadChat(currentContact);
+  });
+}
+
+if (chatForm) {
+  chatForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const text = messageInput.value.trim();
+    if (!text) return;
+    try {
+      await sendPrivateMessage(currentContact, text);
+      await loadChat(currentContact);
+      messageInput.value = '';
+    } catch (error) {
+      setStatus(`Ошибка отправки сообщения: ${error.message}`);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initChat);

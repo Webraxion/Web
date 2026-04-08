@@ -3,142 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web-платформа с Appwrite</title>
+  <title>Главная · Web-платформа</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
 </head>
 <body>
-  <header>
-    <div class="top-bar">
-      <h1>Web-платформа с Appwrite</h1>
-      <nav class="main-nav">
-        <button data-page="home" class="active">Главная</button>
-        <button data-page="auth">Регистрация / Вход</button>
-        <button data-page="news">Новости</button>
-        <button data-page="private">Личный чат</button>
-        <button data-page="profile">Профиль</button>
-        <button data-page="about">О нас</button>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Web-платформа</a>
+      <nav class="site-nav">
+        <a href="index.html">Главная</a>
+        <a href="forum.html">Форум</a>
+        <a href="news.html">Новости</a>
+        <a href="chat.html">Чат</a>
+        <a href="profile.html">Профиль</a>
+        <a href="about.html">О нас</a>
       </nav>
     </div>
   </header>
 
-  <main>
-    <section id="home-section" class="page active">
-      <h2>Главная</h2>
-      <p class="lead">Здесь доступен личный кабинет, регистрация, вход, выход и публикация контента.</p>
-      <div class="grid-two-col">
-        <div>
-          <div class="card">
-            <h3>Создать тему</h3>
-            <form id="forum-form">
-              <input type="text" id="forum-title" placeholder="Заголовок темы" required>
-              <textarea id="forum-content" placeholder="Текст темы" rows="4" required></textarea>
-              <input type="text" id="forum-category" placeholder="Категория" required>
-              <input type="text" id="forum-tags" placeholder="Теги через запятую">
-              <button type="submit">Опубликовать тему</button>
-            </form>
-            <p class="small-note">Только зарегистрированные пользователи могут публиковать темы.</p>
-          </div>
+  <main class="page page-home">
+    <section class="hero">
+      <div>
+        <h1>Платформа с регистрацией, входом и личным кабинетом</h1>
+        <p>Создай свой проект: регистрация, темы, новости, личный чат и профиль пользователя.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="register.html">Зарегистрироваться</a>
+          <a class="btn btn-secondary" href="login.html">Войти</a>
         </div>
-        <div>
-          <div class="card">
-            <h3>Что вы можете сделать</h3>
-            <ul>
-              <li>Зарегистрироваться и войти на сайт</li>
-              <li>Управлять личным кабинетом</li>
-              <li>Писать новости и темы</li>
-              <li>Общаться в личном чате</li>
-            </ul>
-          </div>
-        </div>
+        <div id="home-status" class="status-banner" style="display:none;"></div>
       </div>
-      <h3>Список тем</h3>
-      <div id="home-forum"></div>
-      <h3>Свежие новости</h3>
-      <div id="home-news"></div>
-    </section>
-
-    <section id="auth-section" class="page">
-      <h2>Регистрация и вход</h2>
-      <div id="auth-status" class="auth-status"></div>
-      <div class="grid-two-col">
-        <article class="card">
-          <h3>Регистрация</h3>
-          <form id="register-form">
-            <input type="text" id="register-name" placeholder="Ваше имя" required>
-            <input type="email" id="register-email" placeholder="Email" required>
-            <input type="password" id="register-password" placeholder="Пароль" required>
-            <button type="submit">Зарегистрироваться</button>
-          </form>
+      <div class="hero-cards">
+        <article class="feature-card">
+          <h3>Личный кабинет</h3>
+          <p>Управляй своим профилем, смотри статус и выходи из аккаунта.</p>
         </article>
-        <article class="card">
-          <h3>Вход</h3>
-          <form id="login-form">
-            <input type="email" id="login-email" placeholder="Email" required>
-            <input type="password" id="login-password" placeholder="Пароль" required>
-            <button type="submit">Войти</button>
-          </form>
+        <article class="feature-card">
+          <h3>Форум</h3>
+          <p>Публикуй темы, комментируй и делись идеями с другими пользователями.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Новости</h3>
+          <p>Создавай новости команды и следи за последними обновлениями.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Личный чат</h3>
+          <p>Отправляй сообщения и общайся с другими участниками.</p>
         </article>
       </div>
     </section>
 
-    <section id="news-section" class="page">
-      <h2>Новости</h2>
+    <section class="section-grid">
       <div class="card">
-        <h3>Опубликовать новость</h3>
-        <form id="news-form">
-          <input type="text" id="news-title" placeholder="Заголовок новости" required>
-          <textarea id="news-body" placeholder="Текст новости" rows="4" required></textarea>
-          <button type="submit">Опубликовать</button>
-        </form>
-        <p class="small-note">Только после входа в систему.</p>
+        <h2>Последние темы</h2>
+        <div id="home-forum"></div>
       </div>
-      <div id="news-feed"></div>
-    </section>
-
-    <section id="private-section" class="page">
-      <h2>Личный чат</h2>
-      <div class="card private-card" id="private-chat-area">
-        <div class="inline-row">
-          <label for="private-contact">Выберите собеседника</label>
-          <select id="private-contact"></select>
-        </div>
-        <h3 id="chat-user-name"></h3>
-        <div id="private-messages" class="messages-window"></div>
-        <form id="private-form" class="chat-form">
-          <input id="private-message-text" type="text" placeholder="Ваше сообщение" autocomplete="off" required>
-          <button type="submit">Отправить</button>
-        </form>
-      </div>
-    </section>
-
-    <section id="profile-section" class="page">
-      <h2>Личный кабинет</h2>
-      <div class="card profile-card">
-        <p><strong>Имя</strong>: <span id="profile-name"></span></p>
-        <p><strong>Email</strong>: <span id="profile-email"></span></p>
-        <p><strong>Статус</strong>: <span id="profile-status"></span></p>
-        <button id="logout-btn">Выйти</button>
-      </div>
-    </section>
-
-    <section id="about-section" class="page">
-      <h2>О платформе</h2>
       <div class="card">
-        <p>Это современная платформа для регистрации, личного кабинета, публикации новостей и общения.</p>
-        <ul>
-          <li>Регистрация / Вход через Appwrite</li>
-          <li>Публикация тем и новостей</li>
-          <li>Личный чат с участниками</li>
-          <li>Хранение сессии и профиль пользователя</li>
-        </ul>
+        <h2>Последние новости</h2>
+        <div id="home-news"></div>
       </div>
     </section>
   </main>
 
-  <footer>
-    <p>Web-платформа · Appwrite интеграция</p>
+  <footer class="site-footer">
+    <p>Web-платформа · Node.js & Vanilla JS проект</p>
   </footer>
 
-  <script type="module" src="./scripts/app.js"></script>
+  <script type="module" src="scripts/app.js"></script>
 </body>
 </html>

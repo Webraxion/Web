@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль · Web-платформа</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Web-платформа</a>
+      <nav class="site-nav">
+        <a href="index.html">Главная</a>
+        <a href="forum.html">Форум</a>
+        <a href="news.html">Новости</a>
+        <a href="chat.html">Чат</a>
+        <a href="profile.html">Профиль</a>
+        <a href="about.html">О нас</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page page-profile">
+    <section class="section-card">
+      <div class="card">
+        <h1>Личный кабинет</h1>
+        <p>Информация о пользователе, статус и кнопка выхода.</p>
+        <div id="profile-info" class="profile-details"></div>
+        <button id="logout-btn" class="btn btn-secondary">Выйти</button>
+        <div id="profile-status" class="status-banner"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Web-платформа · Профиль</p>
+  </footer>
+
+  <script type="module" src="scripts/profile.js"></script>
+</body>
+</html>
