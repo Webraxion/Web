@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Форум с Appwrite</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header><h1>Форум с Appwrite</h1></header>
+
+  <main>
+    <section id="posts-section">
+      <h2>Все сообщения</h2>
+      <div id="posts-container"></div>
+    </section>
+
+    <section id="new-post-section">
+      <h2>Создать сообщение</h2>
+      <input type="text" id="title" placeholder="Заголовок">
+      <textarea id="content" placeholder="Содержание"></textarea>
+      <input type="text" id="author" placeholder="Ваше имя">
+      <input type="text" id="category" placeholder="Категория">
+      <input type="text" id="tags" placeholder="Теги через запятую">
+      <button id="create-btn">Создать</button>
+    </section>
+  </main>
+
+  <script type="module">
+    import { getPosts, createPost, incrementViews } from './scripts/appwrite.js';
+
+    const postsContainer = document.getElementById("posts-container");
+    const createBtn = document.getElementById("create-btn");
+
+    async function renderPosts() {
+      const posts = await getPosts();
+      postsContainer.innerHTML = "";
+      posts.forEach(post => {
+        const div = document.createElement("div");
+        div.className = "post-card";
+        div.innerHTML = `
+          <h3>${post.заголовок}</h3>
+          <p>${post.содержание}</p>
+          <p><b>Автор:</b> ${post.авторИмя} | <b>Категория:</b> ${post.категория}</p>
+          <p><b>Просмотры:</b> ${post.просмотры} | <b>Теги:</b> ${post.теги.join(", ")}</p>
+          <button class="view-btn">Просмотр +1</button>
+        `;
+        const viewBtn = div.querySelector(".view-btn");
+        viewBtn.addEventListener("click", async () => {
+          await incrementViews(post.$id, post.просмотры);
+          renderPosts();
+        });
+        postsContainer.appendChild(div);
+      });
+    }
+
+    createBtn.addEventListener("click", async () => {
+      const title = document.getElementById("title").value;
+      const content = document.getElementById("content").value;
+      const author = document.getElementById("author").value;
+      const category = document.getElementById("category").value;
+      const tags = document.getElementById("tags").value.split(",").map(t => t.trim());
+      await createPost(title, content, author, category, tags);
+      renderPosts();
+    });
+
+    renderPosts();
+  </script>
+</body>
+</html>
